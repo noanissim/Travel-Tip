@@ -1,4 +1,6 @@
-import {locService} from './loc.service.js';
+import {
+  locService
+} from './loc.service.js';
 
 export const mapService = {
   initMap,
@@ -6,6 +8,7 @@ export const mapService = {
   panTo,
   getSearchLoc,
   goToLoc,
+  getWeather,
 };
 
 var gMap;
@@ -15,7 +18,10 @@ function initMap(lat = 32.0749831, lng = 34.9120554) {
   return _connectGoogleApi().then(() => {
     console.log('google available');
     gMap = new google.maps.Map(document.querySelector('#map'), {
-      center: {lat, lng},
+      center: {
+        lat,
+        lng
+      },
       zoom: 15,
     });
 
@@ -36,7 +42,7 @@ function initMap(lat = 32.0749831, lng = 34.9120554) {
         lat: clickedLoc.lat,
         lng: clickedLoc.lng,
       };
-      goToLoc(clickedLoc); //not sure if its good to do this way
+      goToLoc(clickedLoc);
       addMarker(desLoc);
       // setPlace(position, name);
       // renderList();
@@ -48,6 +54,10 @@ function initMap(lat = 32.0749831, lng = 34.9120554) {
 
 function goToLoc(loc) {
   mapService.panTo(loc.lat, loc.lng);
+  const prmWeather = getWeather(loc);
+  return prmWeather.then((res) => {
+    return res;
+  });
 }
 
 function addMarker(loc) {
@@ -84,6 +94,23 @@ function getSearchLoc(locName) {
   return prm;
   // locService.addNewLoc(locObj);
 }
+
+function getWeather(loc) {
+  const prm = axios
+    .get(
+      `http://api.openweathermap.org/data/2.5/weather?units=metric&lat=${loc.lat}&lon=${loc.lng}&APPID=683c7de4d90e72e45b9a2053f19998fa
+      `
+    )
+    .then((res) => {
+      console.log('Axios Res:', res);
+
+      // return res.data.weather[0].description;
+      return res.data.main.temp;
+    });
+  return prm;
+}
+
+//weather api - 42b99a84f65eef15a9599f60bd7c562d
 
 function _connectGoogleApi() {
   if (window.google) return Promise.resolve();
